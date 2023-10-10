@@ -14,8 +14,19 @@ from sincfold.embeddings import NT_DICT
 from sincfold.utils import write_ct, validate_file, ct2dot
 from sincfold.parser import parser
 from sincfold.utils import dot2png, ct2svg
+import logging
 
 __version__ = "0.16"
+
+logging.basicConfig(
+    level=logging.DEBUG,  # Set the minimum log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()  # Log to console
+        # Add more handlers for logging to files, etc.
+    ]
+)
+logger = logging.getLogger(__name__)
 
 def main():
     
@@ -45,7 +56,7 @@ def main():
     np.random.seed(42)
 
     if args.command == "train": 
-        train(args.train_file, config, args.out_path,  args.valid_file, args.j)
+        train(args.train_file, args.embeddings_file, config, args.out_path,  args.valid_file, args.j)
 
     if args.command == "test":
         test(args.test_file, args.model_weights, args.output_file, config, args.j)
@@ -53,8 +64,7 @@ def main():
     if args.command == "pred":
         pred(args.pred_file, args.sequence_name, args.model_weights, args.output_file, config, args.j, args.draw, args.draw_resolution)    
         
-def train(train_file, config={}, out_path=None, valid_file=None, nworkers=2, verbose=True):
-    
+def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None, nworkers=1, verbose=True):
     
     if out_path is None:
         out_path = f"results_{str(datetime.today()).replace(' ', '-')}/"
@@ -86,15 +96,16 @@ def train(train_file, config={}, out_path=None, valid_file=None, nworkers=2, ver
         data.drop(val_data.index).to_csv(train_file, index=False)
         
     batch_size = config["batch_size"] if "batch_size" in config else 4
+    logger.info(f"batch size {batch_size}")
     train_loader = DataLoader(
-        SeqDataset(train_file, **config),
+        SeqDataset(train_file, embeddings_file, **config),
         batch_size=batch_size,
         shuffle=True,
         num_workers=nworkers,
         collate_fn=pad_batch,
     )
     valid_loader = DataLoader(
-        SeqDataset(valid_file, **config),
+        SeqDataset(valid_file, embeddings_file, **config),
         batch_size=batch_size,
         shuffle=False,
         num_workers=nworkers,

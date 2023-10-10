@@ -24,8 +24,13 @@ def parser():
     parser_train.add_argument(
         "train_file",
         type=str,
-        
         help="Training dataset (csv file with 'id', 'sequence', and 'dotbracket' or 'base_pairs' columns)",
+    )
+
+    parser_train.add_argument(
+        "embeddings_file",
+        type=str,
+        help="Embeddings file (.pt file)",
     )
 
     parser_train.add_argument(

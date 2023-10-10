@@ -7,6 +7,9 @@ import math
 
 from sincfold.metrics import contact_f1
 from sincfold.utils import mat2bp, postprocessing
+import logging
+
+logger = logging.getLogger(__name__)
 
 SINCFOLD_WEIGHTS = 'https://github.com/sinc-lab/sincFold/raw/main/weights/weights.pmt'
 
@@ -18,14 +21,14 @@ def sincfold(pretrained=False, weights=None, **kwargs):
     """
     model = SincFold(**kwargs)
     if pretrained:
-        print("Load pretrained weights...")
+        logger.info("Load pretrained weights...")
         model.load_state_dict(tr.hub.load_state_dict_from_url(SINCFOLD_WEIGHTS, map_location=tr.device(model.device)))
     else:
         if weights is not None:
-            print(f"Load weights from {weights}")
+            logger.info(f"Load weights from {weights}")
             model.load_state_dict(tr.load(weights, map_location=tr.device(model.device)))
         else:
-            print("No weights provided, using random initialization")
+            logger.info("No weights provided, using random initialization")
         
     return model
 
@@ -154,13 +157,17 @@ class SincFold(nn.Module):
         """args includes additional variables from dataloader: L, mask, seqid, sequence, [prob_mask]"""
         n = x.shape[2]
         mask = args[1].to(self.device)
-        y = self.resnet(x)
-        ya = self.convsal1(y)
-        ya = tr.transpose(ya, -1, -2)
+        y = x # embeddings in x variable, no need to apply conv layers
+        # y = self.resnet(x) # 1D convolutional layer that performs a first automatic extraction of low-level features for each nucleotide + 1D-ResNet
 
-        yb = self.convsal2(y)
+        # unneeded
+        # ya = self.convsal1(y)
+        # ya = tr.transpose(ya, -1, -2)
 
-        y = ya @ yb
+        # unneeded
+        # yb = self.convsal2(y)
+
+        y = tr.transpose(y, -1, -2) @ y # 1D -> 2D: not the only way to do it
         yt = tr.transpose(y, -1, -2)
         y = (y + yt) / 2
 

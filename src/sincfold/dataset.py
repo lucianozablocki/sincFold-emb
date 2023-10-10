@@ -6,12 +6,13 @@ import json
 import pickle
 from sincfold.embeddings import OneHotEmbedding
 from sincfold.utils import valid_mask, prob_mat, bp2matrix, dot2bp
+import logging
 
+logger = logging.getLogger(__name__)
 
 class SeqDataset(Dataset):
     def __init__(
-        self, dataset_path, min_len=0, max_len=512, verbose=False, cache_path=None, for_prediction=False, 
-        use_restrictions=False, **kargs):
+        self, dataset_path, embeddings_path, min_len=0, max_len=512, verbose=False, cache_path=None, for_prediction=False, use_restrictions=False, **kargs):
         self.max_len = max_len
         self.verbose = verbose
         if cache_path is not None and not os.path.isdir(cache_path):
@@ -55,8 +56,9 @@ class SeqDataset(Dataset):
         self.sequences = data.sequence.tolist()
         self.ids = data.id.tolist()
 
-        self.embedding = OneHotEmbedding()
-        self.embedding_size = self.embedding.emb_size
+        self.embeddings = tr.load(embeddings_path)
+        logger.info(f"keys are {len(self.embeddings)}")
+
         self.use_restrictions = use_restrictions
 
         self.base_pairs = None
@@ -79,8 +81,11 @@ class SeqDataset(Dataset):
             Mc = None
             if self.base_pairs is not None:
                 Mc = bp2matrix(L, self.base_pairs[idx])
-
-            seq_emb = self.embedding.seq2emb(sequence)
+            if seqid not in self.embeddings:
+                logger.error(f"{seqid} not present")
+            if L > self.max_len:
+                logger.error(f"{seqid} too long: len {L}")
+            seq_emb = self.embeddings[seqid].T
 
             mask = valid_mask(sequence)
             if self.use_restrictions:
