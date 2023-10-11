@@ -168,20 +168,23 @@ class SincFold(nn.Module):
         # yb = self.convsal2(y)
 
         y = tr.transpose(y, -1, -2) @ y # 1D -> 2D: not the only way to do it
-        yt = tr.transpose(y, -1, -2)
-        y = (y + yt) / 2
+        
+        # y is already simmetric
+        # yt = tr.transpose(y, -1, -2)
+        # y = (y + yt) / 2
 
-        y0 = y.view(-1, n, n).multiply(mask)  # add valid connection mask
+        # remove y0
+        # y = y.view(-1, n, n).multiply(mask)  # add valid connection mask
 
         batch_size = x.shape[0]
 
         if self.use_restrictions:
             prob_mat = args[4].to(self.device)
             x1 = tr.zeros([batch_size, 2, n, n]).to(self.device)
-            x1[:, 0, :, :] = y0
+            x1[:, 0, :, :] = y
             x1[:, 1, :, :] = prob_mat
         else:
-            x1 = y0.unsqueeze(1)
+            x1 = y.unsqueeze(1)
 
         # Representation
         y = self.conv2D1(x1)
@@ -195,15 +198,17 @@ class SincFold(nn.Module):
         yt = tr.transpose(y, -1, -2)
         y = (y + yt) / 2
 
-        return y, y0
+        return y
 
     def loss_func(self, yhat, y):
         """yhat and y are [N, M, M]"""
         y = y.view(y.shape[0], -1)
-        yhat, y0 = yhat  # yhat is the final ouput and y0 is the cnn output
+        # now, yhat will be a single tensor and not a tuple,
+        # so remove everything that uses it
+        # yhat, y0 = yhat  # yhat is the final ouput and y0 is the cnn output
 
         yhat = yhat.view(yhat.shape[0], -1)
-        y0 = y0.view(y0.shape[0], -1)
+        # y0 = y0.view(y0.shape[0], -1)
 
         # Add l1 loss, ignoring the padding
         l1_loss = tr.mean(tr.relu(yhat[y != -1]))
@@ -214,13 +219,13 @@ class SincFold(nn.Module):
         yhat = tr.cat((-yhat, yhat), dim=1)
         error_loss = cross_entropy(yhat, y, ignore_index=-1, weight=self.class_weight)
 
-        y0 = y0.unsqueeze(1)
-        y0 = tr.cat((-y0, y0), dim=1)
-        error_loss1 = cross_entropy(y0, y, ignore_index=-1, weight=self.class_weight)
+        # y0 = y0.unsqueeze(1)
+        # y0 = tr.cat((-y0, y0), dim=1)
+        # error_loss1 = cross_entropy(y0, y, ignore_index=-1, weight=self.class_weight)
 
         loss = (
             error_loss
-            + self.loss_beta * error_loss1
+            # + self.loss_beta * error_loss1
             + self.loss_l1 * l1_loss
         )
         return loss
