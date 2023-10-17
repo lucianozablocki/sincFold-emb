@@ -49,7 +49,7 @@ class SincFold(nn.Module):
         """Base classifier model from embedding sequence-
         negative_weigth: not_conected/conected proportion in error weights."""
         super().__init__()
-
+        logger.info(f"learning rate is {lr}")
         self.device = device
         self.class_weight = tr.tensor([negative_weight, 1.0]).float().to(device)
         self.loss_l1 = loss_l1
@@ -94,38 +94,39 @@ class SincFold(nn.Module):
         dilation_resnet2d=3,
         **kwargs
     ):
-        pad = (kernel - 1) // 2
+        # pad = (kernel - 1) // 2
 
         self.use_restrictions = mid_ch != 1
 
-        self.resnet = [nn.Conv1d(embedding_dim, filters, kernel, padding="same")]
+        # commenting out unused layers of the model (now that we replaced them with embeddings)
+        # self.resnet = [nn.Conv1d(embedding_dim, filters, kernel, padding="same")]
 
-        for k in range(num_layers):
-            self.resnet.append(
-                ResidualLayer1D(
-                    dilation_resnet1d,
-                    resnet_bottleneck_factor,
-                    filters,
-                    kernel,
-                )
-            )
+        # for k in range(num_layers):
+        #     self.resnet.append(
+        #         ResidualLayer1D(
+        #             dilation_resnet1d,
+        #             resnet_bottleneck_factor,
+        #             filters,
+        #             kernel,
+        #         )
+        #     )
 
-        self.resnet = nn.Sequential(*self.resnet)
+        # self.resnet = nn.Sequential(*self.resnet)
 
-        self.convsal1 = nn.Conv1d(
-            in_channels=filters,
-            out_channels=rank,
-            kernel_size=kernel,
-            padding=pad,
-            stride=1,
-        )
-        self.convsal2 = nn.Conv1d(
-            in_channels=filters,
-            out_channels=rank,
-            kernel_size=kernel,
-            padding=pad,
-            stride=1,
-        )
+        # self.convsal1 = nn.Conv1d(
+        #     in_channels=filters,
+        #     out_channels=rank,
+        #     kernel_size=kernel,
+        #     padding=pad,
+        #     stride=1,
+        # )
+        # self.convsal2 = nn.Conv1d(
+        #     in_channels=filters,
+        #     out_channels=rank,
+        #     kernel_size=kernel,
+        #     padding=pad,
+        #     stride=1,
+        # )
 
         self.conv2D1 = nn.Conv2d(
             in_channels=mid_ch, out_channels=filters_resnet2d, kernel_size=7, padding="same"
