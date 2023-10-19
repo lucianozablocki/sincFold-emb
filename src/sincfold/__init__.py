@@ -119,6 +119,7 @@ def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None
     if verbose:
         print("Start training...")
     max_epochs = config["max_epochs"] if "max_epochs" in config else 1000
+    logger.info(f"max epochs is {max_epochs}")
     for epoch in range(max_epochs):
         train_metrics = net.fit(train_loader)
 
@@ -126,11 +127,14 @@ def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None
 
         if val_metrics["f1"] > best_f1:
             best_f1 = val_metrics["f1"]
+            logger.info(f"saving model at epoch {epoch} with f1 of {best_f1}, resetting patience")
             tr.save(net.state_dict(), os.path.join(out_path, "weights.pmt"))
             patience_counter = 0
         else:
             patience_counter += 1
+            logger.info(f"val f1 has not improved, patience is {patience_counter}")
             if patience_counter > patience:
+                logger.info(f"reach patience limit at epoch {epoch}, stopping training")
                 break
         msg = (
             f"epoch {epoch}:"
