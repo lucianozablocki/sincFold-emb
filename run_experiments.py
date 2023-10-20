@@ -15,7 +15,7 @@ print(configs)
 
 commands = []
 for idx, config in enumerate(configs):
-    commands.append(f"sincFold -d cuda:0 -c {config} train data/train-partition-0.csv data/all_repr_archiveii.pt --valid-file data/valid-partition-0.csv -o ./results-emb-lr-{idx} -r {idx}")
+    commands.append(f"sincFold -d cuda:0 -c {config} train data/train-partition-0.csv data/all_repr_archiveii.pt --valid-file data/valid-partition-0.csv -o ./results-emb-0-{idx} -r {idx}")
 
 # Create a list to hold the subprocess.Popen objects
 processes = []
