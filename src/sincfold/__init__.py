@@ -18,20 +18,23 @@ import logging
 
 __version__ = "0.16"
 
+# moving this out of the main() method to be able to use run_id in the log file name
+args = parser()
+if args.run_id is None:
+    args.run_id = f"{str(datetime.today()).replace(' ', '-')}"
+
 logging.basicConfig(
     level=logging.DEBUG,  # Set the minimum log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(name)s.%(lineno)d - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler()  # Log to console
-        # Add more handlers for logging to files, etc.
+        logging.StreamHandler(),  # Log to console
+        logging.FileHandler(f'log-{args.run_id}.txt', mode='w'),
     ]
 )
 logger = logging.getLogger(__name__)
 
 def main():
-    
-    args = parser()
-    
+
     if not args.no_cache and args.command == "train":
         cache_path = "cache/"
     else:
@@ -113,7 +116,8 @@ def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None
     )
 
     net = sincfold(**config)
-    
+    num_trainable_params = sum(p.numel() for p in net.parameters() if p.requires_grad)
+    logger.info(f"Number of trainable parameters: {num_trainable_params}")
     best_f1, patience_counter = -1, 0
     patience = config["patience"] if "patience" in config else 30
     if verbose:
@@ -144,7 +148,7 @@ def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None
         )
         
         if verbose:
-            print(msg)
+            logger.info(msg)
         with open(os.path.join(out_path, "train.txt"), "a") as f: 
             f.write(msg + "\n")
             f.flush()

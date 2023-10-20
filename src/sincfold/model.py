@@ -95,6 +95,12 @@ class SincFold(nn.Module):
         **kwargs
     ):
         # pad = (kernel - 1) // 2
+        logger.info(f"mid ch is {mid_ch}")
+        logger.info(f"kernel resnet 2d is {kernel_resnet2d}")
+        logger.info(f"bottleneck1 resnet2d is {bottleneck1_resnet2d}")
+        logger.info(f"bottleneck3 resnet2d is {bottleneck2_resnet2d}")
+        logger.info(f"filters resnet2d is {filters_resnet2d}")
+        logger.info(f"dilation resnet2d is {dilation_resnet2d}")
 
         self.use_restrictions = mid_ch != 1
 

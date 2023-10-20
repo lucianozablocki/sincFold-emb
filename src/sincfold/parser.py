@@ -32,6 +32,12 @@ def parser():
         type=str,
         help="Embeddings file (.pt file)",
     )
+    parser_train.add_argument(
+        "-r",
+        type=str,
+        dest="run_id",
+        help="Run ID (if not provided, it is generated with the current date)",
+    )
 
     parser_train.add_argument(
         "--valid-file",
