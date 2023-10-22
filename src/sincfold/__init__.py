@@ -121,7 +121,7 @@ def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None
     best_f1, patience_counter = -1, 0
     patience = config["patience"] if "patience" in config else 30
     if verbose:
-        print("Start training...")
+        print(f"Start training {args.run_id}...")
     max_epochs = config["max_epochs"] if "max_epochs" in config else 1000
     logger.info(f"max epochs is {max_epochs}")
     for epoch in range(max_epochs):

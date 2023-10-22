@@ -87,8 +87,7 @@ class SincFold(nn.Module):
         resnet_bottleneck_factor=0.5,
         mid_ch=1,
         kernel_resnet2d=5,
-        bottleneck1_resnet2d=128,
-        bottleneck2_resnet2d=64,
+        bottlenecks_resnet2d=[128, 64],
         filters_resnet2d=128,
         rank=32,
         dilation_resnet2d=3,
@@ -97,10 +96,10 @@ class SincFold(nn.Module):
         # pad = (kernel - 1) // 2
         logger.info(f"mid ch is {mid_ch}")
         logger.info(f"kernel resnet 2d is {kernel_resnet2d}")
-        logger.info(f"bottleneck1 resnet2d is {bottleneck1_resnet2d}")
-        logger.info(f"bottleneck3 resnet2d is {bottleneck2_resnet2d}")
+        logger.info(f"bottlenecks resnet2d is {[bottleneck for bottleneck in bottlenecks_resnet2d]}")
         logger.info(f"filters resnet2d is {filters_resnet2d}")
         logger.info(f"dilation resnet2d is {dilation_resnet2d}")
+        logger.info(f"num of resnet2d blocks is {len(bottlenecks_resnet2d)}")
 
         self.use_restrictions = mid_ch != 1
 
@@ -137,19 +136,9 @@ class SincFold(nn.Module):
         self.conv2D1 = nn.Conv2d(
             in_channels=mid_ch, out_channels=filters_resnet2d, kernel_size=7, padding="same"
         )
-        self.resnet_block = [
-            ResidualBlock2D(
-                filters_resnet2d,
-                bottleneck1_resnet2d,
-                kernel_resnet2d,
-                dilation_resnet2d,
-            ), ResidualBlock2D(
-                filters_resnet2d,
-                bottleneck2_resnet2d,
-                kernel_resnet2d,
-                dilation_resnet2d,
-            )
-        ]
+        self.resnet_block = [block for i in range(len(bottlenecks_resnet2d)) for block in [
+            ResidualBlock2D(filters_resnet2d, bottlenecks_resnet2d[i], kernel_resnet2d, dilation_resnet2d),
+        ]]
         
         self.resnet_block = nn.Sequential(*self.resnet_block)
 

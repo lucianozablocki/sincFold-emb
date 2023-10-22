@@ -17,14 +17,5 @@ commands = []
 for idx, config in enumerate(configs):
     commands.append(f"sincFold -d cuda:0 -c {config} train data/train-partition-0.csv data/all_repr_archiveii.pt --valid-file data/valid-partition-0.csv -o ./results-emb-0-{idx} -r {idx}")
 
-# Create a list to hold the subprocess.Popen objects
-processes = []
-
-# Start the processes
 for command in commands:
-    process = subprocess.Popen(command, shell=True)
-    processes.append(process)
-
-# Wait for all processes to complete
-for process in processes:
-    process.wait()
+    subprocess.call(command, shell=True)
