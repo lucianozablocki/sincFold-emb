@@ -62,7 +62,7 @@ def main():
         train(args.train_file, args.embeddings_file, config, args.out_path,  args.valid_file, args.j)
 
     if args.command == "test":
-        test(args.test_file, args.model_weights, args.output_file, config, args.j)
+        test(args.test_file, args.embeddings_file, args.model_weights, args.output_file, config, args.j)
 
     if args.command == "pred":
         pred(args.pred_file, args.sequence_name, args.model_weights, args.output_file, config, args.j, args.draw, args.draw_resolution)    
@@ -163,14 +163,14 @@ def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None
     if os.path.exists(tmp_file):
         os.remove(tmp_file)
     
-def test(test_file, model_weights=None, output_file=None, config={}, nworkers=2, verbose=True):
+def test(test_file, embeddings_file, model_weights=None, output_file=None, config={}, nworkers=2, verbose=True):
     test_file = test_file
     test_file = validate_file(test_file)
     if verbose not in config:
         config["verbose"] = verbose
 
     test_loader = DataLoader(
-        SeqDataset(test_file, **config),
+        SeqDataset(test_file, embeddings_file, **config),
         batch_size=config["batch_size"] if "batch_size" in config else 4,
         shuffle=False,
         num_workers=nworkers,
@@ -183,14 +183,14 @@ def test(test_file, model_weights=None, output_file=None, config={}, nworkers=2,
         net = sincfold(pretrained=True, **config)
     
     if verbose:
-        print(f"Start test of {test_file}")        
+        logger.info(f"Start test of {test_file}")
     test_metrics = net.test(test_loader)
     summary = " ".join([f"test_{k} {v:.3f}" for k, v in test_metrics.items()])
     if output_file is not None:
         with open(output_file, "w") as f:
             f.write(summary+"\n")
     if verbose:
-        print(summary)
+        logger.info(summary)
 
 def pred(pred_input, sequence_id='pred_id', model_weights=None, out_path=None, config={}, nworkers=2, draw=False, draw_resolution=10, verbose=True):
     

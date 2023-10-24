@@ -69,6 +69,18 @@ def parser():
         type=str,
         help="Testing dataset (csv file with 'id', 'sequence', and 'dotbracket' or 'base_pairs' columns)",
     )
+    
+    parser_test.add_argument(
+        "embeddings_file",
+        type=str,
+        help="Embeddings file (.pt file)",
+    )
+    parser_test.add_argument(
+        "-r",
+        type=str,
+        dest="run_id",
+        help="Run ID (if not provided, it is generated with the current date)",
+    )
     parser_test.add_argument(
         "-w", type=str, dest="model_weights", help="Trained model weights"
     )

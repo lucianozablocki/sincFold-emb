@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 # Specify the directory path
 directory_path = "config"
@@ -14,8 +15,13 @@ for entry in os.listdir(directory_path):
 print(configs)
 
 commands = []
+mode = sys.argv[1]
 for idx, config in enumerate(configs):
-    commands.append(f"sincFold -d cuda:0 -c {config} train data/train-partition-0.csv data/all_repr_archiveii.pt --valid-file data/valid-partition-0.csv -o ./results-emb-0-{idx} -r {idx}")
-
+    if mode == 'train':
+        commands.append(f"sincFold -d cuda:0 -c {config} {mode} data/train-partition-0.csv data/all_repr_archiveii.pt --valid-file data/valid-partition-0.csv -o ./results-emb-0-{idx} -r {idx}")
+    elif mode == 'test':
+        commands.append(f"sincFold -d cuda:0 -c {config} {mode} data/test-partition-0.csv data/all_repr_archiveii.pt -w ./results-emb-0-{idx}/weights.pmt -o ./results-emb-0-{idx}-test -r {idx}test")
+    else:
+        print('you must specify a mode')
 for command in commands:
     subprocess.call(command, shell=True)
