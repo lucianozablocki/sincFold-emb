@@ -196,7 +196,7 @@ class SincFold(nn.Module):
             x1 = tr.zeros([batch_size, 2, n, n]).to(self.device)
             x1[:, 0, :, :] = y
             x1[:, 1, :, :] = prob_mat
-        else:
+        # else:
             # logger.info("not using restrictions")
             # commenting this out, tensor has already size 2*dxLxL, no need to add channel dimension
             # x1 = y.unsqueeze(1)
