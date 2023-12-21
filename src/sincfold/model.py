@@ -197,7 +197,7 @@ class SincFold(nn.Module):
             x1[:, 0, :, :] = y
             x1[:, 1, :, :] = prob_mat
         else:
-            logger.info("not using restrictions")
+            # logger.info("not using restrictions")
             # commenting this out, tensor has already size 2*dxLxL, no need to add channel dimension
             # x1 = y.unsqueeze(1)
         # Representation
