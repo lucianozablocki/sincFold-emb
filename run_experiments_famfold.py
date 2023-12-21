@@ -12,7 +12,7 @@ for idx in partitions:
     all_embeddings_file = "data/all_repr_archiveii.pt"
     # where to store .txt file (epoch :train_loss train_f1 val_loss val_f1 format)
     # and weights from training 
-    results_file = f"./results-emb-famfold-{idx}"
+    results_file = f"./results-emb-famfold-{idx}-pairwise"
     if mode == 'train':
         train_file = f"data/famfold-data/train-partition-{idx}-famfold.csv"
         valid_file = f"data/famfold-data/valid-partition-{idx}-famfold.csv"
@@ -20,14 +20,14 @@ for idx in partitions:
         commands.append(
             f"sincFold -d cuda:0 {mode} {train_file} \
                 {all_embeddings_file} --valid-file {valid_file} \
-                -o {results_file} -r {idx}famfold"
+                -o {results_file} -r {idx}famfold-pairwise"
         )
     elif mode == 'test':
         test_file = f"data/famfold-data/test-partition-{idx}-famfold.csv"
         commands.append(
             f"sincFold -d cuda:0 {mode} {test_file} \
                 {all_embeddings_file} \
-                -w {results_file}/weights.pmt -o {results_file}-test -r {idx}famfoldtest"
+                -w {results_file}/weights.pmt -o {results_file}-test -r {idx}famfoldtest-pairwise"
         )
     else:
         print('you must specify a mode')
