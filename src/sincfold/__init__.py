@@ -68,7 +68,7 @@ def main():
         pred(args.pred_file, args.sequence_name, args.model_weights, args.output_file, config, args.j, args.draw, args.draw_resolution)    
         
 def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None, nworkers=1, verbose=True):
-    
+    logger.info("-------------CHANGES APPLIED-------------")
     if out_path is None:
         out_path = f"results_{str(datetime.today()).replace(' ', '-')}/"
     else:
