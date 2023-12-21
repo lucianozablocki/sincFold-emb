@@ -172,7 +172,7 @@ class SincFold(nn.Module):
         batch_size = y.shape[0]
         L = y.shape[2]
         d = y.shape[1]
-        pairwise_concat = tr.zeros(batch_size, d*2, L, L)
+        pairwise_concat = tr.zeros(batch_size, d*2, L, L).to(self.device)
         for batch in range(batch_size):
             for i in range(L):
                 for j in range(L):
