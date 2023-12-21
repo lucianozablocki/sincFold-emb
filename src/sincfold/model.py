@@ -133,8 +133,10 @@ class SincFold(nn.Module):
         #     stride=1,
         # )
 
+        # hardcoding 1280 here thats is equal to embedding dimmension * 2
+        # ideally it will be a parameter
         self.conv2D1 = nn.Conv2d(
-            in_channels=mid_ch, out_channels=filters_resnet2d, kernel_size=7, padding="same"
+            in_channels=1280, out_channels=filters_resnet2d, kernel_size=7, padding="same"
         )
         self.resnet_block = [block for i in range(len(bottlenecks_resnet2d)) for block in [
             ResidualBlock2D(filters_resnet2d, bottlenecks_resnet2d[i], kernel_resnet2d, dilation_resnet2d),
@@ -163,8 +165,22 @@ class SincFold(nn.Module):
         # unneeded
         # yb = self.convsal2(y)
 
-        y = tr.transpose(y, -1, -2) @ y # 1D -> 2D: not the only way to do it
-        
+        # kronecker product here
+        # kron = tr.kron(tr.transpose(y,1,2), tr.transpose(y,1,2))
+        # logger.info(f"size of kron y x y: {kron.shape}")
+
+        batch_size = y.shape[0]
+        L = y.shape[2]
+        d = y.shape[1]
+        pairwise_concat = tr.zeros(batch_size, d*2, L, L)
+        for batch in range(batch_size):
+            for i in range(L):
+                for j in range(L):
+                    pairwise_concat[batch, :, i, j] = tr.cat((y[batch, :, i], y[batch, :, j]))
+
+        # commenting this as we are using pairwise_concat as alternative method
+        # y = tr.transpose(y, -1, -2) @ y # 1D -> 2D: not the only way to do it
+
         # y is already simmetric
         # yt = tr.transpose(y, -1, -2)
         # y = (y + yt) / 2
@@ -175,15 +191,17 @@ class SincFold(nn.Module):
         batch_size = x.shape[0]
 
         if self.use_restrictions:
+            logger.info("using restrictions")
             prob_mat = args[4].to(self.device)
             x1 = tr.zeros([batch_size, 2, n, n]).to(self.device)
             x1[:, 0, :, :] = y
             x1[:, 1, :, :] = prob_mat
         else:
-            x1 = y.unsqueeze(1)
-
+            logger.info("not using restrictions")
+            # commenting this out, tensor has already size 2*dxLxL, no need to add channel dimension
+            # x1 = y.unsqueeze(1)
         # Representation
-        y = self.conv2D1(x1)
+        y = self.conv2D1(pairwise_concat)
         # resnet block
         y = self.resnet_block(y)
         # output
