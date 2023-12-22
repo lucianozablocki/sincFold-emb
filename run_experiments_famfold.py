@@ -2,8 +2,9 @@ import subprocess
 import sys
 
 commands = []
-mode = sys.argv[1]
-partitions = sys.argv[2].split(',')
+device_id = sys.argv[1] 
+mode = sys.argv[2]
+partitions = sys.argv[3].split(',')
 # partitions is something like 0,1,2,3,4
 for idx in partitions:
     # for every partition on the list, generate the train/test command
@@ -18,14 +19,14 @@ for idx in partitions:
         valid_file = f"data/famfold-data/valid-partition-{idx}-famfold.csv"
         # make a list 
         commands.append(
-            f"sincFold -d cuda:0 {mode} {train_file} \
+            f"sincFold -d cuda:{device_id} {mode} {train_file} \
                 {all_embeddings_file} --valid-file {valid_file} \
                 -o {results_file} -r {idx}famfold-pairwise"
         )
     elif mode == 'test':
         test_file = f"data/famfold-data/test-partition-{idx}-famfold.csv"
         commands.append(
-            f"sincFold -d cuda:0 {mode} {test_file} \
+            f"sincFold -d cuda:{device_id} {mode} {test_file} \
                 {all_embeddings_file} \
                 -w {results_file}/weights.pmt -o {results_file}-test -r {idx}famfoldtest-pairwise"
         )
