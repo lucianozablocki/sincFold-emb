@@ -18,7 +18,7 @@ for idx in partitions:
     results_dir = f"{working_dir}-{idx}"
     if mode == 'train':
         train_file = f"{data_dir}/train-partition-{idx}.csv"
-        valid_file = f"{data_dir}/famfold-data/valid-partition-{idx}.csv"
+        valid_file = f"{data_dir}/valid-partition-{idx}.csv"
         # make a list 
         commands.append(
             f"sincFold -d cuda:{device_id} {mode} {train_file} \
