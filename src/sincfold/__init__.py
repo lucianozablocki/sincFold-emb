@@ -23,10 +23,11 @@ args = parser()
 if args.run_id is None:
     args.run_id = f"{str(datetime.today()).replace(' ', '-')}"
 
-if not os.path.isdir(args.out_path):
-    os.makedirs(args.out_path)
-else:
-    raise ValueError(f"Output path {args.out_path} already exists")
+if hasattr(args, 'out_path'):
+    if not os.path.isdir(args.out_path):
+        os.makedirs(args.out_path)
+    else:
+        raise ValueError(f"Output path {args.out_path} already exists")
 
 logging.basicConfig(
     level=logging.DEBUG,  # Set the minimum log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -34,7 +35,7 @@ logging.basicConfig(
     handlers=[
         logging.StreamHandler(),  # Log to console
         logging.FileHandler(f'{args.out_path}/log-{args.run_id}.txt', mode='w'),
-    ]
+    ] if args.command == 'train' else [logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
