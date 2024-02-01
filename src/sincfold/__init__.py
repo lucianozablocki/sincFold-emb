@@ -130,9 +130,8 @@ def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None
         val_metrics = net.test(valid_loader)
 
         if val_metrics["f1"] > best_f1:
+            logger.info("resetting patience")
             best_f1 = val_metrics["f1"]
-            logger.info(f"saving model at epoch {epoch} with f1 of {best_f1}, resetting patience")
-            tr.save(net.state_dict(), os.path.join(out_path, "weights.pmt"))
             patience_counter = 0
         else:
             patience_counter += 1
@@ -140,6 +139,8 @@ def train(train_file, embeddings_file, config={}, out_path=None, valid_file=None
             if patience_counter > patience:
                 logger.info(f"reach patience limit at epoch {epoch}, stopping training")
                 break
+        logger.info(f"saving model at epoch {epoch} with f1 of {best_f1}")
+        tr.save(net.state_dict(), os.path.join(out_path, f"weights-epoch{epoch}.pmt"))
         msg = (
             f"epoch {epoch}:"
             + " ".join([f"train_{k} {v:.3f}" for k, v in train_metrics.items()])
