@@ -33,5 +33,5 @@ print(f"finished calculating averages, matrix is now of size {average_embedding.
 distance_matrix = cdist(average_embedding, average_embedding, 'euclidean')
 print(f"finished calculating distance matrix with size of {distance_matrix.shape}")
 
-np.savetxt(output_path, distance_matrix, delimiter=',')
+np.savetxt(output_file_path, distance_matrix, delimiter=',')
 print(f"finished saving distance matrix to disk")
