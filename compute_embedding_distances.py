@@ -20,8 +20,8 @@ n = len(id_to_embedding_seq)
 print(f"there are {n} sequences in the dataset")
 all_embedding_seq = np.zeros((n, max_L, d))
 for i, embedding_seq in enumerate(id_to_embedding_seq.values()):
-    # all_embedding_seq[i] = np.pad(embedding_seq, ((0, max_L - embedding_seq.shape[0]),(0,0)))
-    pass
+    all_embedding_seq[i] = np.pad(embedding_seq, ((0, max_L - embedding_seq.shape[0]),(0,0)))
+
 print(f"finished creating matrix with all the embeddings in it, of size {all_embedding_seq.shape}")
 
 all_embeding_seq = ma.masked_array(all_embedding_seq, mask=(all_embedding_seq==0))
