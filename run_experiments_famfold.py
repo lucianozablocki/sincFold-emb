@@ -9,6 +9,7 @@ device_id = sys.argv[3]
 mode = sys.argv[4]
 partitions = sys.argv[5].split(',')
 config_dir = sys.argv[6]
+epoch = sys.argv[7]
 # partitions is something like 0,1,2,3,4
 
 # Specify the directory path
@@ -44,7 +45,7 @@ for idx in partitions:
         commands.append(
             f"sincFold -d cuda:{device_id} {mode} {test_file} \
                 {all_embeddings_file} \
-                -w {results_dir}/weights.pmt -o {results_dir}-test -r {idx}test"
+                -w {results_dir}/weights-epoch{epoch}.pmt -o {results_dir}-test -r {idx}test"
         )
     else:
         print('you must specify a mode')
