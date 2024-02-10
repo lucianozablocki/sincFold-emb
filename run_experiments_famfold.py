@@ -9,19 +9,7 @@ device_id = sys.argv[3]
 mode = sys.argv[4]
 partitions = sys.argv[5].split(',')
 # partitions is something like 0,1,2,3,4 (list of data partitions to use)
-config_dir = sys.argv[6]
 
-# Specify the directory path
-# directory_path = "config-peek"
-configs = []
-# List all files in the directory
-for entry in os.listdir(config_dir):
-    entry_path = os.path.join(config_dir, entry)
-    if os.path.isfile(entry_path):
-        parent_dir_name = os.path.basename(config_dir)
-        file_name = entry
-        configs.append(os.path.join(parent_dir_name, file_name))
-print(configs)
 
 for idx in partitions:
     # for every partition on the list, generate the train/test command
@@ -37,7 +25,7 @@ for idx in partitions:
         # want to know how the test loss progress over time (experimental phase)
         valid_file = f"{data_dir}/test-partition-{idx}.csv"
         commands.append(
-            f"sincFold -d cuda:{device_id} {mode} {train_file} \
+            f"sincFold -d cuda:{device_id} -c config-peek/config.json {mode} {train_file} \
                 {all_embeddings_file} --valid-file {valid_file} \
                 -o {results_dir} -r {idx}"
         )
