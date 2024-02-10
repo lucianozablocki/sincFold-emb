@@ -8,9 +8,8 @@ working_dir = sys.argv[2]
 device_id = sys.argv[3] 
 mode = sys.argv[4]
 partitions = sys.argv[5].split(',')
+# partitions is something like 0,1,2,3,4 (list of data partitions to use)
 config_dir = sys.argv[6]
-epoch = sys.argv[7]
-# partitions is something like 0,1,2,3,4
 
 # Specify the directory path
 # directory_path = "config-peek"
@@ -34,9 +33,11 @@ for idx in partitions:
     results_dir = f"{working_dir}-{idx}"
     if mode == 'train':
         train_file = f"{data_dir}/train-partition-{idx}.csv"
-        valid_file = f"{data_dir}/valid-partition-{idx}.csv"
+        # using test partition as validation, completely wrong, but we
+        # want to know how the test loss progress over time (experimental phase)
+        valid_file = f"{data_dir}/test-partition-{idx}.csv"
         commands.append(
-            f"sincFold -d cuda:{device_id} -c {configs[int(idx)]} {mode} {train_file} \
+            f"sincFold -d cuda:{device_id} {mode} {train_file} \
                 {all_embeddings_file} --valid-file {valid_file} \
                 -o {results_dir} -r {idx}"
         )
@@ -45,7 +46,7 @@ for idx in partitions:
         commands.append(
             f"sincFold -d cuda:{device_id} {mode} {test_file} \
                 {all_embeddings_file} \
-                -w {results_dir}/weights-epoch{epoch}.pmt -o {results_dir}-test -r {idx}test"
+                -w {results_dir}/weights.pmt -o {results_dir}-test -r {idx}test"
         )
     else:
         print('you must specify a mode')
